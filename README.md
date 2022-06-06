@@ -1,7 +1,7 @@
 # FBKT
 
 This is the source code for the paper "Fuzzy Bayesian Knowledge Tracing".
-If you use this code, please cite the following paper.
+If you use this code, please cite the following paper. Thank you.
 
 @article{liu2021fuzzy,
   title={Fuzzy Bayesian Knowledge Tracing},
