@@ -1,6 +1,5 @@
 import numpy as np
 
-#隶属度函数yita_j(y_t)的计算
 def cal_membership(y, miu, sigma):
 
     if sigma < 0.0000001:

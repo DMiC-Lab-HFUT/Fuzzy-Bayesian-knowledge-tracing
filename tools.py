@@ -9,28 +9,22 @@ import math
 from sklearn.metrics import accuracy_score, confusion_matrix, \
     f1_score, recall_score, roc_auc_score, mean_squared_error, precision_score
 
-# def get_str_btw(s, f, b):
-#     #取字符串中两个字符之间的内容
-#     par = s.partition(f)
-#     return (par[2].partition(b))[0][:]
 
 def get_arrayindex(X, a):
-    #返回ndarray X中元素为a的索引
     for i in range(len(X)):
         if X[i] == a:
             return i
 
-def text_save(filename, data):#filename为写入txt文件的路径，data为要写入数据列表.
+def text_save(filename, data):
     file = open(filename,'a')
     for i in range(len(data)):
-        s = str(data[i]).replace('[','').replace(']','')#去除[],这两行按数据不同，可以选择
-        s = s.replace("'",'').replace(',','') +'\n'   #去除单引号，逗号，每行末尾追加换行符
+        s = str(data[i]).replace('[','').replace(']','')
+        s = s.replace("'",'').replace(',','') +'\n'  
         file.write(s)
     file.close()
     print("保存文件成功")
 
 def get_file(file_dir):
-    #获取文件夹内的所有文件名
     file_names = []
     for root, dirs, files in os.walk(file_dir):
         file_names.append(files)
@@ -45,7 +39,6 @@ def Get_Average(list):
 
 
 def Read_X(folder):
-    # folder表示文件存放地址
     X = list()
     with open(folder, 'r', encoding='utf-8') as f:
         old_lines = f.readlines()
@@ -54,16 +47,9 @@ def Read_X(folder):
         if idx % 3 == 2:
             lines.append(old_lines[idx])
     for line in lines:
-        # line = line.lstrip('[\'')
-        # line = line.strip().rstrip(',\']')
+   
         line_list = line.strip().split('\t')
-        # =======jsw+++++++++
-        # line_list = line.strip(',').split(',')
 
-        # 删去最后一个逗号后的空位
-        # del line_list[-1]
-        # 删去用作预测的数据
-        # del line_list[-1]
         new_line_list = list()
         for each in line_list:
             each = float(each)
@@ -74,9 +60,9 @@ def Read_X(folder):
     return X
 
 def Get_X(X):
-    # X表示要处理的list参数X_train, X_test
+
     X1 = [list(each) for each in X if list(each)]
-    # 格式转换，得到可使用的train和test
+
     get_x = []
     for i in X1:
         new = []
@@ -86,7 +72,7 @@ def Get_X(X):
     return get_x
 
 def kmeans_X(X, number_symbols):
-    #将观测数据X聚类
+
     cluster_X_hat = []
     X_all = []
     for each in X:
@@ -94,13 +80,12 @@ def kmeans_X(X, number_symbols):
     for i in range(len(cluster_X_hat)):
         for each in cluster_X_hat[i]:
             X_all.append(each)
-    # 得到聚类中心centers和每个数据所属的类assignments
+
     centers, sigma1, assignments, de_dataset, dict = kmeans.k_means(X_all, number_symbols)
     return centers, sigma1, assignments, de_dataset, dict
 
-#运行时间太长
 def gmm_X(X, number_symbols):
-    #将观测数据X聚类
+
     cluster_X_hat = []
     X_all = []
     for each in X:
@@ -109,15 +94,12 @@ def gmm_X(X, number_symbols):
         for each in cluster_X_hat[i]:
             X_all.append(each)
     X_all = np.matrix(X_all)
-    # 得到聚类中心centers和每个数据所属的类assignments
+
     Miu, Sigma, alpha = gmm.my_GMM(X_all, number_symbols)
     return Miu, Sigma, alpha
 
-###########################################################################
-#这里的判断语句不是完全正确，但在当前数据集下，不影响。
-###########################################################################
+
 def Judge_type(qlg_y):
-    # 舍去样本qlg_y_train中类别只有1个的情况
     if ((len(np.flatnonzero(qlg_y)) == 0) or (len(np.flatnonzero(qlg_y)) == len(qlg_y))):
         print('qlg_y_train样本类别小于2')
         return 0
@@ -125,16 +107,13 @@ def Judge_type(qlg_y):
         return 1
 
 def predict(score_train, score_test, qlg_y_train, qlg_y_test, method):
-    ##method:int型，若method=0，则采用0.5直接分割法处理数据得到预测值；
-    ##              若method=1，则采用LogisticRegression处理数据得到预测值；
-    ##              若method=2，则采用LinearRegression处理数据得到预测值；
     if method == 0:
         score_train, score_test = pd.DataFrame([1 if each >= 0.5 else 0 for each in score_train]), \
                                   pd.DataFrame([1 if each >= 0.5 else 0 for each in score_test])
         predict1 = np.array(score_train)
         predict2 = np.array(score_test)
     elif method == 1:
-        lg = LogisticRegression()  # logistic regression for learning gain prediction
+        lg = LogisticRegression() 
         lg.fit(pd.DataFrame(score_train), pd.DataFrame(qlg_y_train))
         predict1 = lg.predict(pd.DataFrame(score_train))
         predict1 = [each for each in predict1]
@@ -161,24 +140,21 @@ def error_cal(target, prediction):
     squaredError = []
     absError = []
     for val in error:
-        squaredError.append(val * val)  # target-prediction之差平方
-        absError.append(abs(val))  # 误差绝对值
+        squaredError.append(val * val)  
+        absError.append(abs(val)) 
 
-    MSE = sum(squaredError) / len(squaredError) # 均方误差MSE
-    # RMSE = sqrt(sum(squaredError) / len(squaredError)) # 均方根误差RMSE
-    MAE = sum(absError) / len(absError) # 平均绝对误差MAE
+    MSE = sum(squaredError) / len(squaredError) 
+    MAE = sum(absError) / len(absError) 
 
     targetDeviation = []
-    targetMean = sum(target) / len(target)  # target平均值
+    targetMean = sum(target) / len(target)  
     for val in target:
         targetDeviation.append((val - targetMean) * (val - targetMean))
-    Variance = sum(targetDeviation) / len(targetDeviation) # 方差
-    # Sigma = sqrt(sum(targetDeviation) / len(targetDeviation)) # 标准差
+    Variance = sum(targetDeviation) / len(targetDeviation)
     return MSE, MAE, Variance
 
 
 def computeCorrelation(X, Y):
-    #计算Rsquare
     xBar = np.mean(X)
     yBar = np.mean(Y)
     SSR = 0
@@ -194,7 +170,6 @@ def computeCorrelation(X, Y):
     return (SSR / SST) ** 2
 
 def Rsquare(Y, Y_hat):
-    #计算Rsquare
     yBar = np.mean(Y)
     First = 0
     Second = 0
@@ -229,36 +204,3 @@ def calculate(qlg_train_actual, qlg_train_pred, qlg_test_actual, qlg_test_pred,
     rsquare_test.append(r12)
     return mse_train, mse_test, rmse_train, rmse_test, mae_train, mae_test, \
            variance_train, variance_test, sigma_train, sigma_test, rsquare_train, rsquare_test
-
-# def print_final_result(folder_result, result7, t):
-#     # print('training_accuracy_score')
-#     # print(result1)
-#     # print('accuracy_score')
-#     # print(result2)
-#     # print('AUC')
-#     # print(result3)
-#     # print('F1_score')
-#     # print(result4)
-#     # print('recall_score')
-#     # print(result5)
-#     # print('precision_score')
-#     # print(result6)
-#     print('MSE')
-#     print(result7)
-#     # text_save(folder_result + '/training_accuracy_score.txt', result1)
-#     # text_save(folder_result + '/accuracy_score.txt', result2)
-#     # text_save(folder_result + '/AUC.txt', result3)
-#     # text_save(folder_result + '/F1_score.txt', result4)
-#     # text_save(folder_result + '/recall_score.txt', result5)
-#     # text_save(folder_result + '/precision_score.txt', result6)
-#     text_save(folder_result + '/MSE.txt', result7)
-#     result_all = []
-#     # result_all.append(Get_Average(result1))
-#     # result_all.append(Get_Average(result2))
-#     # result_all.append(Get_Average(result3))
-#     # result_all.append(Get_Average(result4))
-#     # result_all.append(Get_Average(result5))
-#     # result_all.append(Get_Average(result6))
-#     result_all.append(Get_Average(result7))
-#     result_all.append(t)
-#     text_save(folder_result + '/result_all.txt', result_all)
